@@ -48,7 +48,7 @@ const getCryptoData = async (crypto) => {
 
 const getCryptoChart = async (crypto) => {
 	try {
-		const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=30`);
+		const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=3`);
 
 		return response;
 	} catch (error) {
@@ -99,6 +99,14 @@ bot.command('chart', async (ctx) => {
 	}
 
 	const { prices } = data;
+
+	const chart = `https://chart.googleapis.com/chart?chs=400x400&cht=lc&chco=FF0000&chds=a&chxt=x,y&chxr=1,0,${Math.max(
+		...prices.map((x) => x[1])
+	)}&chd=t:${prices.map((x) => x[1]).join(',')}`;
+
+	console.log(chart);
+
+	ctx.replyWithPhoto({ url: chart });
 });
 
 bot.launch();
