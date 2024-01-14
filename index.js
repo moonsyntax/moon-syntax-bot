@@ -1,7 +1,6 @@
 const axios = require('axios');
 const { Telegraf } = require('telegraf');
 var shajs = require('sha.js');
-const canvas = require('canvas');
 
 const bot = new Telegraf('6763816126:AAH3VQtQiNRhok62bld_7SZoPFY-WDelbXQ');
 
