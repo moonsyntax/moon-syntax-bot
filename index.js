@@ -36,11 +36,11 @@ async function axiosCache(url) {
 	return maindata;
 }
 
-const getCryptoPrice = async (crypto) => {
+const getCryptoData = async (crypto) => {
 	try {
-		const response = await axiosCache(`https://api.coingecko.com/api/v3/simple/price?ids=${crypto}&vs_currencies=usd`);
+		const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}`);
 
-		return response[crypto].usd;
+		return response;
 	} catch (error) {
 		console.error(error);
 	}
@@ -56,14 +56,18 @@ bot.command('price', async (ctx) => {
 		return;
 	}
 
-	const price = await getCryptoPrice(crypto);
+	const data = await getCryptoData(crypto);
 
-	if (!price) {
-		replyandlog(ctx, 'Sorry, could not get price');
+	if (!data) {
+		replyandlog(ctx, 'Crypto not found');
 		return;
 	}
 
-	replyandlog(ctx, `The price of ${crypto} is ${price} USD`);
+	const { name, symbol, market_data } = data;
+
+	const { current_price } = market_data;
+
+	replyandlog(ctx, `${name} (${symbol}) \nPrice: ${current_price.usd} USD\nPrice: ${current_price.btc} BTC`);
 });
 
 bot.launch();
