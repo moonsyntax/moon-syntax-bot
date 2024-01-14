@@ -65,9 +65,12 @@ bot.command('price', async (ctx) => {
 
 	const { name, symbol, market_data } = data;
 
-	const { current_price } = market_data;
+	const { current_price, ath, atl } = market_data;
 
-	replyandlog(ctx, `${name} (${symbol}) \nPrice: ${current_price.usd} USD\nPrice: ${current_price.btc} BTC`);
+	replyandlog(
+		ctx,
+		`${name} (${symbol}) \n\nPrice:\n${current_price.usd} USD\n${current_price.btc} BTC \n\nATH : ${ath.usd} USD \nATL : ${atl.usd} USD\n`
+	);
 });
 
 bot.launch();
