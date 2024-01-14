@@ -46,6 +46,16 @@ const getCryptoData = async (crypto) => {
 	}
 };
 
+const getCryptoChart = async (crypto) => {
+	try {
+		const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=30`);
+
+		return response;
+	} catch (error) {
+		console.error(error);
+	}
+};
+
 bot.start((ctx) => ctx.reply('Welcome!'));
 
 bot.command('price', async (ctx) => {
@@ -71,6 +81,24 @@ bot.command('price', async (ctx) => {
 		ctx,
 		`${name} (${symbol}) \n\nPrice:\n${current_price.usd} USD\n${current_price.btc} BTC \n\nATH : ${ath.usd} USD \nATL : ${atl.usd} USD\n`
 	);
+});
+
+bot.command('chart', async (ctx) => {
+	const crypto = parseCommand(ctx.message.text)[1];
+
+	if (!crypto) {
+		replyandlog(ctx, 'Please specify a crypto');
+		return;
+	}
+
+	const data = await getCryptoChart(crypto);
+
+	if (!data) {
+		replyandlog(ctx, 'Crypto not found');
+		return;
+	}
+
+	const { prices } = data;
 });
 
 bot.launch();
