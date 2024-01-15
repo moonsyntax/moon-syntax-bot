@@ -6,7 +6,7 @@ const shajs = require('sha.js');
 
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
-const canvas = new ChartJSNodeCanvas({ width: 1000, height: 1000 });
+const canvas = new ChartJSNodeCanvas({ width: 2000, height: 800 });
 
 const bot = new Telegraf('6763816126:AAH3VQtQiNRhok62bld_7SZoPFY-WDelbXQ');
 
