@@ -52,7 +52,7 @@ const getCryptoData = async (crypto) => {
 	}
 };
 
-async function getCryptoChart(cryptoSymbol) {
+async function getCryptoChart(crypto) {
 	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=3`);
 
 	const prices = response.prices;
@@ -66,7 +66,7 @@ async function getCryptoChart(cryptoSymbol) {
 			labels: dates,
 			datasets: [
 				{
-					label: `${cryptoSymbol.toUpperCase()} Price (USD)`,
+					label: `${crypto.toUpperCase()} Price (USD)`,
 					data: pricesInUSD,
 					borderColor: 'blue',
 					fill: false,
