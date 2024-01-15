@@ -126,4 +126,8 @@ bot.command('chart', async (ctx) => {
 	ctx.replyWithPhoto({ source: imageBuffer });
 });
 
-bot.launch();
+try {
+	bot.launch();
+} catch (error) {
+	console.log(error);
+}
