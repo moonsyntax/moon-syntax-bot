@@ -122,7 +122,7 @@ bot.command('chart', async (ctx) => {
 		return;
 	}
 
-	ctx.replyWithPhoto({ url: imageBuffer });
+	ctx.replyWithPhoto({ source: imageBuffer });
 });
 
 bot.launch();
