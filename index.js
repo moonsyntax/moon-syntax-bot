@@ -53,7 +53,7 @@ const getCryptoData = async (crypto) => {
 };
 
 async function getCryptoChart(crypto) {
-	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=3`);
+	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=30`);
 
 	const prices = response.prices;
 
