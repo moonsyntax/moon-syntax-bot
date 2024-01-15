@@ -1,6 +1,12 @@
 const axios = require('axios');
+
 const { Telegraf } = require('telegraf');
-var shajs = require('sha.js');
+
+const shajs = require('sha.js');
+
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+
+const canvas = new ChartJSNodeCanvas({ width: 1000, height: 1000 });
 
 const bot = new Telegraf('6763816126:AAH3VQtQiNRhok62bld_7SZoPFY-WDelbXQ');
 
@@ -46,15 +52,33 @@ const getCryptoData = async (crypto) => {
 	}
 };
 
-const getCryptoChart = async (crypto) => {
-	try {
-		const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=3`);
+async function getCryptoChart(cryptoSymbol) {
+	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=3`);
 
-		return response;
-	} catch (error) {
-		console.error(error);
-	}
-};
+	const prices = response.prices;
+
+	const dates = prices.map((price) => new Date(price[0]));
+	const pricesInUSD = prices.map((price) => price[1]);
+
+	const chartData = {
+		type: 'line',
+		data: {
+			labels: dates,
+			datasets: [
+				{
+					label: `${cryptoSymbol.toUpperCase()} Price (USD)`,
+					data: pricesInUSD,
+					borderColor: 'blue',
+					fill: false,
+				},
+			],
+		},
+	};
+
+	const imageBuffer = await canvas.renderToBuffer(chartData);
+
+	return imageBuffer;
+}
 
 bot.start((ctx) => ctx.reply('Welcome!'));
 
@@ -91,22 +115,14 @@ bot.command('chart', async (ctx) => {
 		return;
 	}
 
-	const data = await getCryptoChart(crypto);
+	const imageBuffer = await getCryptoChart(crypto);
 
-	if (!data) {
+	if (!imageBuffer) {
 		replyandlog(ctx, 'Crypto not found');
 		return;
 	}
 
-	const { prices } = data;
-
-	const chart = `https://chart.googleapis.com/chart?chs=400x400&cht=lc&chco=FF0000&chds=a&chxt=x,y&chxr=1,0,${Math.max(
-		...prices.map((x) => x[1])
-	)}&chd=t:${prices.map((x) => x[1]).join(',')}`;
-
-	console.log(chart);
-
-	ctx.replyWithPhoto({ url: chart });
+	ctx.replyWithPhoto({ url: imageBuffer });
 });
 
 bot.launch();
