@@ -52,8 +52,8 @@ const getCryptoData = async (crypto) => {
 	}
 };
 
-async function getCryptoChart(crypto) {
-	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=30`);
+async function getCryptoChart(crypto, days = 30) {
+	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=${days}`);
 
 	const prices = response.prices;
 
@@ -109,13 +109,14 @@ bot.command('price', async (ctx) => {
 
 bot.command('chart', async (ctx) => {
 	const crypto = parseCommand(ctx.message.text)[1];
+	const days = parseCommand(ctx.message.text)[2] || 30;
 
 	if (!crypto) {
 		replyandlog(ctx, 'Please specify a crypto');
 		return;
 	}
 
-	const imageBuffer = await getCryptoChart(crypto);
+	const imageBuffer = await getCryptoChart(crypto, days);
 
 	if (!imageBuffer) {
 		replyandlog(ctx, 'Crypto not found');
