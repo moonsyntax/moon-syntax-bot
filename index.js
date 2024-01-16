@@ -35,15 +35,19 @@ async function axiosCache(url) {
 		return saveCache.find((x) => x.hash === hash).maindata;
 	}
 
-	const cache = await axios.get(url);
+	try {
+		const cache = await axios.get(url);
 
-	const maindata = cache.data;
+		const maindata = cache.data;
 
-	saveCache.push({ hash, maindata });
+		saveCache.push({ hash, maindata });
 
-	saveCache = saveCache.slice(-1000);
+		saveCache = saveCache.slice(-1000);
 
-	return maindata;
+		return maindata;
+	} catch (error) {
+		console.error(error);
+	}
 }
 
 const getCryptoData = async (crypto) => {
@@ -194,7 +198,9 @@ bot.on('message', async (ctx) => {
 
 	const words = text.split(' ');
 
-	console.log(words);
+	if (words.length < 1) {
+		return;
+	}
 
 	const addresses = words.filter((word) => validate(word));
 
