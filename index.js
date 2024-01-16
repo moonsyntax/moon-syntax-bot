@@ -106,7 +106,23 @@ async function getTrendingCrypto() {
 	}
 }
 
-bot.start((ctx) => ctx.reply('Welcome!'));
+let coinslist = [];
+
+async function getAllCryptoNames() {
+	const response = await axiosCache('https://api.coingecko.com/api/v3/coins/list');
+
+	const coins = response;
+
+	coinslist = coins.map((coin) => {
+		const { id } = coin;
+
+		return `${id}`;
+	});
+
+	console.log('Coins List', coinslist.length);
+
+	console.log(coinslist[6]);
+}
 
 bot.command('price', async (ctx) => {
 	const crypto = parseCommand(ctx.message.text)[1];
@@ -182,31 +198,52 @@ bot.on('message', async (ctx) => {
 
 	const addresses = words.filter((word) => validate(word));
 
-	if (addresses.length === 0) {
-		return;
+	if (addresses.length > 0) {
+		const address = addresses[0];
+
+		const info = await getBitcoinAddressInfo(address);
+
+		const { balance, final_balance, total_received, total_sent } = info;
+
+		const balanceInBTC = balance / 100000000;
+
+		const final_balanceInBTC = final_balance / 100000000;
+
+		const total_receivedInBTC = total_received / 100000000;
+
+		const total_sentInBTC = total_sent / 100000000;
+
+		replyandlog(
+			ctx,
+			`Address: ${address}\n\nBalance: ${balanceInBTC} BTC\nFinal Balance: ${final_balanceInBTC} BTC\nTotal Received: ${total_receivedInBTC} BTC\nTotal Sent: ${total_sentInBTC} BTC`
+		);
 	}
 
-	const address = addresses[0];
+	const cryptos = words.filter((word) => coinslist.includes(word.toLowerCase()));
 
-	const info = await getBitcoinAddressInfo(address);
+	if (cryptos.length > 0) {
+		const crypto = cryptos[0];
 
-	const { balance, final_balance, total_received, total_sent } = info;
+		const data = await getCryptoData(crypto);
 
-	const balanceInBTC = balance / 100000000;
+		if (!data) {
+			replyandlog(ctx, 'Crypto not found');
+			return;
+		}
 
-	const final_balanceInBTC = final_balance / 100000000;
+		const { name, symbol, market_data } = data;
 
-	const total_receivedInBTC = total_received / 100000000;
+		const { current_price, ath, atl } = market_data;
 
-	const total_sentInBTC = total_sent / 100000000;
-
-	replyandlog(
-		ctx,
-		`Address: ${address}\n\nBalance: ${balanceInBTC} BTC\nFinal Balance: ${final_balanceInBTC} BTC\nTotal Received: ${total_receivedInBTC} BTC\nTotal Sent: ${total_sentInBTC} BTC`
-	);
+		replyandlog(
+			ctx,
+			`${name} (${symbol}) \n\nPrice:\n${current_price.usd} USD\n${current_price.btc} BTC \n\nATH : ${ath.usd} USD \nATL : ${atl.usd} USD\n`
+		);
+	}
 });
 
 try {
+	getAllCryptoNames();
 	bot.launch();
 } catch (error) {
 	console.log(error);
