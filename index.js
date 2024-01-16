@@ -95,10 +95,10 @@ async function getTrendingCrypto() {
 
 			const { name, symbol, market_cap_rank, thumb } = item;
 
-			return `${name} (${symbol}) \n`;
+			return `${name} (${symbol})`;
 		});
 
-		return trending.join('\n\n');
+		return trending.join('\n');
 	} catch (error) {
 		console.error(error);
 	}
