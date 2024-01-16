@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const axios = require('axios');
 
 const { Telegraf } = require('telegraf');
@@ -8,9 +10,10 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 const canvas = new ChartJSNodeCanvas({ width: 2000, height: 1200 });
 
-const bot = new Telegraf('6763816126:AAH3VQtQiNRhok62bld_7SZoPFY-WDelbXQ');
+const bot = new Telegraf(process.env.TELEGRAMBOT);
 
 const { validate, getAddressInfo } = require('bitcoin-address-validation');
+const { configDotenv } = require('dotenv');
 
 let saveCache = [];
 
@@ -191,6 +194,8 @@ bot.on('message', async (ctx) => {
 	const text = ctx.message.text;
 
 	const words = text.split(' ');
+
+	console.log(words);
 
 	const addresses = words.filter((word) => validate(word));
 

@@ -13,6 +13,7 @@
     "axios": "^1.6.5",
     "bitcoin-address-validation": "^2.2.3",
     "chartjs-node-canvas": "^4.1.6",
+    "dotenv": "^16.3.1",
     "sha.js": "^2.4.11",
     "telegraf": "^4.15.3"
   }
