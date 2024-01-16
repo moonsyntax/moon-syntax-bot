@@ -10,6 +10,8 @@ const canvas = new ChartJSNodeCanvas({ width: 2000, height: 1200 });
 
 const bot = new Telegraf('6763816126:AAH3VQtQiNRhok62bld_7SZoPFY-WDelbXQ');
 
+const { validate, getAddressInfo } = require('bitcoin-address-validation');
+
 let saveCache = [];
 
 function parseCommand(text) {
@@ -159,6 +161,49 @@ bot.command('trending', async (ctx) => {
 	}
 
 	replyandlog(ctx, trending);
+});
+
+async function getBitcoinAddressInfo(address) {
+	try {
+		const response = await axios.get(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`);
+
+		const data = response.data;
+
+		return data;
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+bot.on('message', async (ctx) => {
+	const text = ctx.message.text;
+
+	const words = text.split(' ');
+
+	const addresses = words.filter((word) => validate(word));
+
+	if (addresses.length === 0) {
+		return;
+	}
+
+	const address = addresses[0];
+
+	const info = await getBitcoinAddressInfo(address);
+
+	const { balance, final_balance, total_received, total_sent } = info;
+
+	const balanceInBTC = balance / 100000000;
+
+	const final_balanceInBTC = final_balance / 100000000;
+
+	const total_receivedInBTC = total_received / 100000000;
+
+	const total_sentInBTC = total_sent / 100000000;
+
+	replyandlog(
+		ctx,
+		`Address: ${address}\n\nBalance: ${balanceInBTC} BTC\nFinal Balance: ${final_balanceInBTC} BTC\nTotal Received: ${total_receivedInBTC} BTC\nTotal Sent: ${total_sentInBTC} BTC`
+	);
 });
 
 try {
