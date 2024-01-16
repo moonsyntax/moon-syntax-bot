@@ -26,6 +26,18 @@ function replyandlog(ctx, text) {
 	return ctx.reply(text);
 }
 
+async function getBinancePrice(crypto) {
+	try {
+		const response = await axios.get(`https://api.binance.com/api/v3/ticker/price?symbol=${crypto}USDT`);
+
+		const data = response.data;
+
+		return data;
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 async function axiosCache(url) {
 	const hash = shajs('sha256').update(url).digest('hex');
 
