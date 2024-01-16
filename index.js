@@ -13,7 +13,6 @@ const canvas = new ChartJSNodeCanvas({ width: 2000, height: 1200 });
 const bot = new Telegraf(process.env.TELEGRAMBOT);
 
 const { validate, getAddressInfo } = require('bitcoin-address-validation');
-const { configDotenv } = require('dotenv');
 
 let saveCache = [];
 
