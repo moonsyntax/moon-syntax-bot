@@ -52,12 +52,16 @@ const getCryptoData = async (crypto) => {
 	}
 };
 
-async function getCryptoChart(crypto, days = 30) {
+async function getCryptoChart(crypto, days = 7) {
 	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=${days}`);
 
 	const prices = response.prices;
 
-	const dates = prices.map((price) => new Date(price[0]));
+	const dates = prices.map((price) => {
+		const date = new Date(price[0]);
+		return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+	});
+
 	const pricesInUSD = prices.map((price) => price[1]);
 
 	const chartData = {
