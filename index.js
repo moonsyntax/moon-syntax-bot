@@ -118,10 +118,6 @@ async function getAllCryptoNames() {
 
 		return `${id}`;
 	});
-
-	console.log('Coins List', coinslist.length);
-
-	console.log(coinslist[6]);
 }
 
 bot.command('price', async (ctx) => {
