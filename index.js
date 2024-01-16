@@ -84,6 +84,26 @@ async function getCryptoChart(crypto, days = 7) {
 	return imageBuffer;
 }
 
+async function getTrendingCrypto() {
+	try {
+		const response = await axiosCache('https://api.coingecko.com/api/v3/search/trending');
+
+		const coins = response.coins;
+
+		const trending = coins.map((coin) => {
+			const { item } = coin;
+
+			const { name, symbol, market_cap_rank, thumb } = item;
+
+			return `${name} (${symbol}) \n`;
+		});
+
+		return trending.join('\n\n');
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 bot.start((ctx) => ctx.reply('Welcome!'));
 
 bot.command('price', async (ctx) => {
@@ -113,7 +133,7 @@ bot.command('price', async (ctx) => {
 
 bot.command('chart', async (ctx) => {
 	const crypto = parseCommand(ctx.message.text)[1];
-	const days = parseCommand(ctx.message.text)[2] || 30;
+	const days = parseCommand(ctx.message.text)[2] || 7;
 
 	if (!crypto) {
 		replyandlog(ctx, 'Please specify a crypto');
@@ -128,6 +148,17 @@ bot.command('chart', async (ctx) => {
 	}
 
 	ctx.replyWithPhoto({ source: imageBuffer });
+});
+
+bot.command('trending', async (ctx) => {
+	const trending = await getTrendingCrypto();
+
+	if (!trending) {
+		replyandlog(ctx, 'Crypto not found');
+		return;
+	}
+
+	replyandlog(ctx, trending);
 });
 
 try {
