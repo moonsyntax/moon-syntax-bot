@@ -78,26 +78,6 @@ async function getCryptoChart(crypto, days = 7) {
 	return imageBuffer;
 }
 
-async function getTrendingCrypto() {
-	try {
-		const response = await axiosCache('https://api.coingecko.com/api/v3/search/trending');
-
-		const coins = response.coins;
-
-		const trending = coins.map((coin) => {
-			const { item } = coin;
-
-			const { name, symbol, market_cap_rank, thumb } = item;
-
-			return `${name} (${symbol})`;
-		});
-
-		return trending.join('\n');
-	} catch (error) {
-		console.error(error);
-	}
-}
-
 async function getBitcoinAddressInfo(address) {
 	try {
 		const response = await axiosCache(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`);
@@ -112,6 +92,5 @@ module.exports = {
 	axiosCache,
 	getCryptoData,
 	getCryptoChart,
-	getTrendingCrypto,
 	getBitcoinAddressInfo,
 };
