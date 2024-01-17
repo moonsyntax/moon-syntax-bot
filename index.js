@@ -1,10 +1,6 @@
 require('dotenv').config();
 
-const axios = require('axios');
-
 const { Telegraf } = require('telegraf');
-
-const shajs = require('sha.js');
 
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
@@ -12,117 +8,11 @@ const canvas = new ChartJSNodeCanvas({ width: 2000, height: 1200 });
 
 const bot = new Telegraf(process.env.TELEGRAMBOT);
 
-const { validate, getAddressInfo } = require('bitcoin-address-validation');
+const { validate } = require('bitcoin-address-validation');
 
-let saveCache = [];
+const { axiosCache, getTrendingCrypto, getCryptoChart, getCryptoData, getBitcoinAddressInfo } = require('./modules/request.js');
 
-function parseCommand(text) {
-	const items = text.split(' ');
-	return items.map((x) => x.trim());
-}
-
-function replyandlog(ctx, text) {
-	console.log(text);
-	return ctx.reply(text);
-}
-
-async function getBinancePrice(crypto) {
-	try {
-		const response = await axios.get(`https://api.binance.com/api/v3/ticker/price?symbol=${crypto}USDT`);
-
-		const data = response.data;
-
-		return data;
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-async function axiosCache(url) {
-	const hash = shajs('sha256').update(url).digest('hex');
-
-	if (saveCache.find((x) => x.hash === hash)) {
-		console.log('Cache', saveCache.length);
-
-		return saveCache.find((x) => x.hash === hash).maindata;
-	}
-
-	try {
-		const cache = await axios.get(url);
-
-		const maindata = cache.data;
-
-		saveCache.push({ hash, maindata });
-
-		saveCache = saveCache.slice(-1000);
-
-		return maindata;
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-const getCryptoData = async (crypto) => {
-	try {
-		const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}`);
-
-		return response;
-	} catch (error) {
-		console.error(error);
-	}
-};
-
-async function getCryptoChart(crypto, days = 7) {
-	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=${days}`);
-
-	const prices = response.prices;
-
-	const dates = prices.map((price) => {
-		const date = new Date(price[0]);
-		return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-	});
-
-	const pricesInUSD = prices.map((price) => price[1]);
-
-	const chartData = {
-		type: 'line',
-		data: {
-			labels: dates,
-			datasets: [
-				{
-					label: `${crypto.toUpperCase()} Price (USD)`,
-					data: pricesInUSD,
-					borderColor: 'blue',
-					fill: false,
-				},
-			],
-		},
-	};
-
-	const imageBuffer = await canvas.renderToBuffer(chartData);
-
-	return imageBuffer;
-}
-
-async function getTrendingCrypto() {
-	try {
-		const response = await axiosCache('https://api.coingecko.com/api/v3/search/trending');
-
-		const coins = response.coins;
-
-		const trending = coins.map((coin) => {
-			const { item } = coin;
-
-			const { name, symbol, market_cap_rank, thumb } = item;
-
-			return `${name} (${symbol})`;
-		});
-
-		return trending.join('\n');
-	} catch (error) {
-		console.error(error);
-	}
-}
+const { parseCommand, replyandlog } = require('./modules/utils.js');
 
 let coinslist = [];
 
@@ -193,26 +83,10 @@ bot.command('trending', async (ctx) => {
 	replyandlog(ctx, trending);
 });
 
-async function getBitcoinAddressInfo(address) {
-	try {
-		const response = await axios.get(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`);
-
-		const data = response.data;
-
-		return data;
-	} catch (error) {
-		console.error(error);
-	}
-}
-
 bot.on('message', async (ctx) => {
 	const text = ctx.message.text;
 
 	const words = text.split(' ');
-
-	if (words.length < 1) {
-		return;
-	}
 
 	const addresses = words.filter((word) => validate(word));
 
