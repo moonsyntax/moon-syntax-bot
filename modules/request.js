@@ -2,13 +2,17 @@ const shajs = require('sha.js');
 
 const axios = require('axios');
 
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+
+const canvas = new ChartJSNodeCanvas({ width: 2000, height: 1200 });
+
 // save cache
 let saveCache = [];
 
 // 5 minutes
 const timetottl = 1000 * 60 * 5;
 
-export async function axiosCache(url) {
+async function axiosCache(url) {
 	const hash = shajs('sha256').update(url).digest('hex');
 
 	if (saveCache.find((x) => x.hash === hash)) {
@@ -32,7 +36,7 @@ export async function axiosCache(url) {
 	}
 }
 
-export async function getCryptoData(crypto) {
+async function getCryptoData(crypto) {
 	try {
 		const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}`);
 
@@ -42,7 +46,7 @@ export async function getCryptoData(crypto) {
 	}
 }
 
-export async function getCryptoChart(crypto, days = 7) {
+async function getCryptoChart(crypto, days = 7) {
 	const response = await axiosCache(`https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=${days}`);
 
 	const prices = response.prices;
@@ -74,7 +78,7 @@ export async function getCryptoChart(crypto, days = 7) {
 	return imageBuffer;
 }
 
-export async function getTrendingCrypto() {
+async function getTrendingCrypto() {
 	try {
 		const response = await axiosCache('https://api.coingecko.com/api/v3/search/trending');
 
@@ -94,7 +98,7 @@ export async function getTrendingCrypto() {
 	}
 }
 
-export async function getBitcoinAddressInfo(address) {
+async function getBitcoinAddressInfo(address) {
 	try {
 		const response = await axiosCache(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`);
 
@@ -103,3 +107,11 @@ export async function getBitcoinAddressInfo(address) {
 		console.error(error);
 	}
 }
+
+module.exports = {
+	axiosCache,
+	getCryptoData,
+	getCryptoChart,
+	getTrendingCrypto,
+	getBitcoinAddressInfo,
+};

@@ -2,10 +2,6 @@ require('dotenv').config();
 
 const { Telegraf } = require('telegraf');
 
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-
-const canvas = new ChartJSNodeCanvas({ width: 2000, height: 1200 });
-
 const bot = new Telegraf(process.env.TELEGRAMBOT);
 
 const { validate } = require('bitcoin-address-validation');
@@ -17,15 +13,17 @@ const { parseCommand, replyandlog } = require('./modules/utils.js');
 let coinslist = [];
 
 async function getAllCryptoNames() {
-	const response = await axiosCache('https://api.coingecko.com/api/v3/coins/list');
+	const coins = await axiosCache('https://api.coingecko.com/api/v3/coins/list');
 
-	const coins = response;
+	for (let i = 0; i < coins.length; i++) {
+		const coin = coins[i];
 
-	coinslist = coins.map((coin) => {
-		const { id } = coin;
-
-		return `${id}`;
-	});
+		coinslist.push({
+			name: coin.name,
+			symbol: coin.symbol,
+			id: coin.id,
+		});
+	}
 }
 
 bot.command('price', async (ctx) => {
