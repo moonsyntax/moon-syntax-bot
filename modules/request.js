@@ -2,7 +2,11 @@ const shajs = require('sha.js');
 
 const axios = require('axios');
 
+// save cache
 let saveCache = [];
+
+// 5 minutes
+const timetottl = 1000 * 60 * 5;
 
 export async function axiosCache(url) {
 	const hash = shajs('sha256').update(url).digest('hex');
@@ -18,9 +22,9 @@ export async function axiosCache(url) {
 
 		const maindata = cache.data;
 
-		saveCache.push({ hash, maindata });
+		saveCache.push({ hash, maindata, ttl: Date.now() });
 
-		saveCache = saveCache.slice(-1000);
+		saveCache = saveCache.filter((x) => x.ttl > Date.now() - timetottl);
 
 		return maindata;
 	} catch (error) {
